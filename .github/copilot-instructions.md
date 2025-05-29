@@ -1,7 +1,7 @@
 Project info:
 - Project name: proofreader-ai
 - Project description: An AI-driven proofreading API.
-- Version: 1.0.0
+- Version: 1.1.0
 - Author name: Ron Webb
 - Author email: ron@ronella.xyz
 - Main package: proofreader_ai

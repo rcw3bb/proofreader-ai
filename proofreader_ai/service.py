@@ -10,8 +10,11 @@ from typing import Any
 import httpx
 from dotenv import load_dotenv
 from proofreader_ai.model import Message
+from .logger import setup_logger
+
 
 load_dotenv()
+logger = setup_logger(__name__)
 
 GITHUB_API_URL = "https://models.github.ai/inference/chat/completions"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -31,6 +34,7 @@ class InferenceService:
         env_token = os.getenv("GITHUB_TOKEN")
         self.token = token or env_token
         if not self.token:
+            logger.error("GitHub Models API token is required.")
             raise ValueError("GitHub Models API token is required.")
 
     async def run_inference(
@@ -63,11 +67,16 @@ class InferenceService:
             {"role": "user", "content": prompt},
         ]
         payload = {"model": model, "messages": messages, **params}
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                GITHUB_API_URL, headers=headers, json=payload, timeout=30
-            )
-            response.raise_for_status()
-            data = response.json()
-            choices = data["choices"]
-            return [Message(**choice["message"]) for choice in choices]
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    GITHUB_API_URL, headers=headers, json=payload, timeout=30
+                )
+                response.raise_for_status()
+                data = response.json()
+                choices = data["choices"]
+                logger.info("Inference successful for model '%s'", model)
+                return [Message(**choice["message"]) for choice in choices]
+        except Exception as exc:
+            logger.error("Inference failed: %s", exc, exc_info=True)
+            raise
