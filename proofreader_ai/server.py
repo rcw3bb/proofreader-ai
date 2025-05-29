@@ -13,7 +13,7 @@ app = FastAPI(
     version="1.0.0",
     description="""
     Proofreader AI is an API-driven service for advanced proofreading using AI. 
-    Submit your text to the `/api/proofread` endpoint to receive grammar, spelling, and style suggestions.
+    Submit your text to the `/api/v1/proofread` endpoint to receive grammar, spelling, and style suggestions.
     """,
     contact={
         "name": "Ron Webb",
