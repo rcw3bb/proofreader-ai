@@ -31,11 +31,11 @@ async def test_run_inference_success(monkeypatch):
 
     monkeypatch.setattr("httpx.AsyncClient", lambda: MockAsyncClient())
     service = InferenceService(token="dummy-token")
-    messages: Sequence[Mapping[str, str]] = [
-        {"role": "user", "content": "What is the capital of France?"}
-    ]
-    result = await service.run_inference("openai/gpt-4.1", messages)
-    assert result.content == "Test response"
+    text = "What is the capital of France?"
+    result = await service.run_inference("openai/gpt-4.1", text)
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].content == "Test response"
 
 @pytest.mark.asyncio
 async def test_run_inference_no_token(monkeypatch):

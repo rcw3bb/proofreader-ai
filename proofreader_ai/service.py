@@ -6,11 +6,10 @@ Since: 1.0.0
 """
 
 import os
-from collections.abc import Mapping, Sequence
 from typing import Any
 import httpx
 from dotenv import load_dotenv
-from proofreader_ai.message import MessageModel
+from proofreader_ai.model import Message
 
 load_dotenv()
 
@@ -35,15 +34,15 @@ class InferenceService:
             raise ValueError("GitHub Models API token is required.")
 
     async def run_inference(
-        self, model: str, messages: Sequence[Mapping[str, Any]], **params: Any
-    ) -> MessageModel:
+        self, model: str, text: str, **params: Any
+    ) -> list[Message]:
         """
-        Run an inference request using the specified model and messages.
+        Run an inference request to proofread a text using the specified model.
 
         :param model: Model ID (e.g., 'openai/gpt-4.1').
-        :param messages: List of message dicts as per API spec.
+        :param text: The text to be proofread.
         :param params: Additional parameters for the API.
-        :return: MessageModel containing the assistant's response message.
+        :return: List of Message containing the assistant's response messages.
         """
         headers = {
             "Accept": "application/vnd.github+json",
@@ -51,6 +50,18 @@ class InferenceService:
             "X-GitHub-Api-Version": "2022-11-28",
             "Content-Type": "application/json",
         }
+        prompt = (
+            "Proofread the following paragraph for grammar, spelling, and clarity. "
+            "Output only the corrected text. Do not include explanations.\n\n"
+            f"Paragraph: {text}"
+        )
+        messages = [
+            {
+                "role": "system",
+                "content": "You are an expert proofreader. Always provide clear and concise corrections.",
+            },
+            {"role": "user", "content": prompt},
+        ]
         payload = {"model": model, "messages": messages, **params}
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -58,6 +69,5 @@ class InferenceService:
             )
             response.raise_for_status()
             data = response.json()
-            # Extract the first message from choices
-            message = data["choices"][0]["message"]
-            return MessageModel(**message)
+            choices = data["choices"]
+            return [Message(**choice["message"]) for choice in choices]
