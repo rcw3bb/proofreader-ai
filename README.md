@@ -25,17 +25,15 @@ cd proofreader-ai
 poetry install
 ```
 
-
-Create a `.env` file in the project root with your GitHub Models API token:
-
-## :warning: Logging
-
-The project uses a `logging.ini` file for logging configuration. Logs are written to `proofreader-ai.log` and the console. You can adjust logging settings in `logging.ini` at the project root.
+Ensure that a `GITHUB_TOKEN` environment variable is in your system with your GitHub Models API token:
 
 ```env
 GITHUB_TOKEN=your_github_models_token_here
 ```
 
+## :warning: Logging
+
+The project uses a `logging.ini` file for logging configuration. Logs are written to `proofreader-ai.log` and the console. You can adjust logging settings in `logging.ini` at the project root.
 
 ## :zap: Usage
 
